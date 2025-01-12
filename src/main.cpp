@@ -8,6 +8,6 @@ int main(int argc, char *argv[])
     app.setOrganizationName("AndreWaehlisch");
     app.setApplicationName("bthtscan");
 
-	const agent myagent = agent();
+    const agent myagent();
     return app.exec();
 }

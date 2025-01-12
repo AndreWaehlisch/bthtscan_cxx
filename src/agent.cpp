@@ -1,3 +1,4 @@
+#include <QtGlobal>
 #include <QDebug>
 
 #include "agent.h"
@@ -16,10 +17,16 @@ agent::agent() : QObject(nullptr)
     discoveryAgent.setLowEnergyDiscoveryTimeout(30000);
 
     connect(&discoveryAgent, &QBluetoothDeviceDiscoveryAgent::finished, this, &agent::discoveryFinished);
-    connect(&discoveryAgent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this, &agent::discoveryErrorOccurred);
     connect(&discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &agent::discoveryDeviceDiscovered);
     connect(&localDevice, &QBluetoothLocalDevice::pairingFinished, this, &agent::localPairingFinished);
+
+    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    connect(&discoveryAgent, QOverload<QBluetoothDeviceDiscoveryAgent::Error>::of(&QBluetoothDeviceDiscoveryAgent::error), this, &agent::discoveryErrorOccurred);
+    connect(&localDevice, &QBluetoothLocalDevice::error, this, &agent::localPairingErrorOccurred);
+    #else
+    connect(&discoveryAgent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this, &agent::discoveryErrorOccurred);
     connect(&localDevice, &QBluetoothLocalDevice::errorOccurred, this, &agent::localPairingErrorOccurred);
+    #endif
 
     qDebug() << "Going to scan for" << discoveryAgent.lowEnergyDiscoveryTimeout() / 1000 << "seconds";
     discoveryAgent.start(); // TODO: filter for BLE devices
