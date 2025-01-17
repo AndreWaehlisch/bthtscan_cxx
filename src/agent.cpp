@@ -1,9 +1,11 @@
 #include <QtGlobal>
 #include <QDebug>
 
+#include "global.h"
 #include "agent.h"
+#include "ble_agent.h"
 
-const QStringList agent::targetIDs = {"98:B0:8B:CC:A0:09"};
+const QStringList agent::targetIDs = {"0C:EF:F6:EF:A3:4E"};
 
 agent::agent() : QObject(nullptr)
 {
@@ -14,19 +16,16 @@ agent::agent() : QObject(nullptr)
         qDebug() << "local host mode:" << localDevice.hostMode();
     }
 
-    discoveryAgent.setLowEnergyDiscoveryTimeout(30000);
+    discoveryAgent.setLowEnergyDiscoveryTimeout(61000);
 
     connect(&discoveryAgent, &QBluetoothDeviceDiscoveryAgent::finished, this, &agent::discoveryFinished);
     connect(&discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &agent::discoveryDeviceDiscovered);
-    connect(&localDevice, &QBluetoothLocalDevice::pairingFinished, this, &agent::localPairingFinished);
 
-    #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     connect(&discoveryAgent, QOverload<QBluetoothDeviceDiscoveryAgent::Error>::of(&QBluetoothDeviceDiscoveryAgent::error), this, &agent::discoveryErrorOccurred);
-    connect(&localDevice, &QBluetoothLocalDevice::error, this, &agent::localPairingErrorOccurred);
-    #else
+#else
     connect(&discoveryAgent, &QBluetoothDeviceDiscoveryAgent::errorOccurred, this, &agent::discoveryErrorOccurred);
-    connect(&localDevice, &QBluetoothLocalDevice::errorOccurred, this, &agent::localPairingErrorOccurred);
-    #endif
+#endif
 
     qDebug() << "Going to scan for" << discoveryAgent.lowEnergyDiscoveryTimeout() / 1000 << "seconds";
     discoveryAgent.start(); // TODO: filter for BLE devices
@@ -62,27 +61,15 @@ void agent::discoveryDeviceDiscovered(const QBluetoothDeviceInfo &info)
             qDebug() << ">>>HERE IS SOME INFO ABOUT THE FOUND DEVICES<<<";
             foreach (QBluetoothDeviceInfo device_i, foundList) {
                 qDebug() << " > ID:" << device_i.address() << "NAME:" << device_i.name() << "TYPE:" << device_i.coreConfigurations() << "SIGNALSTRENGTH:" << device_i.rssi();
+                qDebug() << "manuData" << device_i.manufacturerData();
+                qDebug() << "servData" << device_i.serviceData();
             }
 
-            qDebug() << "Trying to pair all devices...";
+            qDebug() << "Trying to connect to all devices...";
             foreach (QBluetoothDeviceInfo device_i, foundList) {
-                localDevice.requestPairing(device_i.address(), QBluetoothLocalDevice::AuthorizedPaired);
+                BLE_agent *new_BLE_agent = new BLE_agent(device_i, this);
+                agentList.append(new_BLE_agent);
             }
         }
     }
-}
-
-void agent::localPairingFinished(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing pairing)
-{
-    if (pairing == QBluetoothLocalDevice::Unpaired) {
-        qDebug() << "Could not pair requested device:" << address << pairing;
-    } else {
-        qDebug() << "Successfully paired:" << address << pairing;
-    }
-}
-
-void agent::localPairingErrorOccurred(QBluetoothLocalDevice::Error error)
-{
-    qDebug() << "Pairing error!" << error;
-    exit(PAIRING_ERROR);
 }
