@@ -67,7 +67,11 @@ void BLE_agent::disconnected()
 
 void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     if (newState != QLowEnergyService::DiscoveringServices) {
+#else
+    if (newState != QLowEnergyService::RemoteServiceDiscovering) {
+#endif
         qDebug() << "Service state changed" << newState;
 
         if (newState == QLowEnergyService::ServiceDiscovered) {
