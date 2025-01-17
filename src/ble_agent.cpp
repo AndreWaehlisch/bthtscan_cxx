@@ -7,7 +7,14 @@ BLE_agent::BLE_agent(const QBluetoothDeviceInfo device, QObject *parent) : QObje
 
     connect(controller, &QLowEnergyController::serviceDiscovered, this, &BLE_agent::serviceDiscovered);
     connect(controller, &QLowEnergyController::discoveryFinished, this, &BLE_agent::discoveryFinished);
+
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+    connect(controller, QOverload<QLowEnergyController::Error>::of(&QLowEnergyController::error), this, &BLE_agent::errorOccurred);
+#else
     connect(controller, &QLowEnergyController::errorOccurred, this, &BLE_agent::errorOccurred);
+#endif
+
     connect(controller, &QLowEnergyController::connected, this, &BLE_agent::connected);
     connect(controller, &QLowEnergyController::disconnected, this, &BLE_agent::disconnected);
 
@@ -60,7 +67,7 @@ void BLE_agent::disconnected()
 
 void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
 {
-    if (newState != QLowEnergyService::DiscoveringService) {
+    if (newState != QLowEnergyService::DiscoveringServices) {
         qDebug() << "Service state changed" << newState;
 
         if (newState == QLowEnergyService::ServiceDiscovered) {
