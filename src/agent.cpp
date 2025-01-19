@@ -5,7 +5,7 @@
 #include "agent.h"
 #include "ble_agent.h"
 
-const QStringList agent::targetIDs = {"0C:EF:F6:EF:A3:4E"};
+const QStringList agent::targetIDs = {"0C:EF:F6:EF:A3:4E"}; // MAC addresses
 
 agent::agent() : QObject(nullptr)
 {
@@ -28,7 +28,7 @@ agent::agent() : QObject(nullptr)
 #endif
 
     qDebug() << "Going to scan for" << discoveryAgent.lowEnergyDiscoveryTimeout() / 1000 << "seconds";
-    discoveryAgent.start(); // TODO: filter for BLE devices
+    discoveryAgent.start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
 
 void agent::discoveryFinished()
@@ -61,10 +61,6 @@ void agent::discoveryDeviceDiscovered(const QBluetoothDeviceInfo &info)
             qDebug() << ">>>HERE IS SOME INFO ABOUT THE FOUND DEVICES<<<";
             foreach (QBluetoothDeviceInfo device_i, foundList) {
                 qDebug() << " > ID:" << device_i.address() << "NAME:" << device_i.name() << "TYPE:" << device_i.coreConfigurations() << "SIGNALSTRENGTH:" << device_i.rssi();
-                qDebug() << "manuData" << device_i.manufacturerData();
-		#if QT_VERSION > QT_VERSION_CHECK(6, 3, 0)
-                qDebug() << "servData" << device_i.serviceData();
-		#endif
             }
 
             qDebug() << "Trying to connect to all devices...";

@@ -7,6 +7,8 @@ enum exitCodes {
     DISCOVERY_ERROR,
     PAIRING_ERROR,
     BLE_ERROR,
+    CHARACTERISTIC_NOT_FOUND,
+    PAYLOAD_TOO_SMALL,
 };
 
 #endif // GLOBAL_H

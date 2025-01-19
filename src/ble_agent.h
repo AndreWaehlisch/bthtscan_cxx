@@ -7,8 +7,6 @@
 #include <QLowEnergyController>
 #include <QBluetoothUuid>
 #include <QLowEnergyService>
-#include <QLowEnergyCharacteristic>
-#include <QLowEnergyDescriptor>
 
 class BLE_agent : public QObject
 {
@@ -28,8 +26,6 @@ private slots:
     void connected();
     void disconnected();
     void serviceStateChanged(QLowEnergyService::ServiceState);
-    void updateValue(const QLowEnergyCharacteristic &, const QByteArray &);
-    void descriptorWritten(const QLowEnergyDescriptor &, const QByteArray &);
     void serviceError(QLowEnergyService::ServiceError);
 };
 
