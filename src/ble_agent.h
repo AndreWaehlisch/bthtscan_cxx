@@ -2,7 +2,6 @@
 #define BLE_AGENT_H
 
 #include <QObject>
-#include <QList>
 #include <QBluetoothDeviceInfo>
 #include <QLowEnergyController>
 #include <QBluetoothUuid>
@@ -17,7 +16,7 @@ public:
 
 private:
     QLowEnergyController *controller;
-    QList<QLowEnergyService *> servicesList;
+    QLowEnergyService *service;
 
 private slots:
     void serviceDiscovered(const QBluetoothUuid &);
@@ -27,6 +26,7 @@ private slots:
     void disconnected();
     void serviceStateChanged(QLowEnergyService::ServiceState);
     void serviceError(QLowEnergyService::ServiceError);
+    void stateChanged(QLowEnergyController::ControllerState);
 };
 
 #endif // BLE_AGENT_H

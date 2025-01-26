@@ -65,9 +65,37 @@ void agent::discoveryDeviceDiscovered(const QBluetoothDeviceInfo &info)
 
             qDebug() << "Trying to connect to all devices...";
             foreach (QBluetoothDeviceInfo device_i, foundList) {
-                BLE_agent *new_BLE_agent = new BLE_agent(device_i, this);
-                agentList.append(new_BLE_agent);
+                if (localDevice.pairingStatus(device_i.address()) == QBluetoothLocalDevice::Unpaired) {
+                    qDebug() << "NOTE: device is UNpaired...";
+                    //    pairingList.append(device_i);
+                    //    localDevice.requestPairing(device_i.address(), QBluetoothLocalDevice::AuthorizedPaired);
+                } else {
+                    qDebug() << "NOTE: device is paired";
+                    do_BLE_connection(device_i);
+                }
             }
         }
     }
+}
+
+void agent::pairingFinished(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing pairing)
+{
+    for (qsizetype i = 0; i < pairingList.length(); i++) {
+        QBluetoothDeviceInfo device_i = pairingList[i];
+        qDebug() << "Pairing finished for device the following device, going to init BLE connection:" << device_i.address();
+
+        if (address == device_i.address()) {
+            do_BLE_connection(device_i);
+            pairingList.remove(i);
+            return;
+        }
+    }
+
+    qDebug() << "Pairing finished for an unknown device. Smells like trouble...";
+}
+
+void agent::do_BLE_connection(const QBluetoothDeviceInfo &device_i)
+{
+    BLE_agent *new_BLE_agent = new BLE_agent(device_i, this);
+    agentList.append(new_BLE_agent);
 }
