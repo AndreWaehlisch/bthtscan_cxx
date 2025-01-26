@@ -2,6 +2,7 @@
 #include <QLowEnergyDescriptor>
 #include <QByteArray>
 #include <QDateTime>
+#include <QDataStream>
 
 #include "global.h"
 #include "ble_agent.h"
