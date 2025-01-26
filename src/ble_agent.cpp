@@ -79,7 +79,13 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
         qDebug() << "";
         qDebug() << "Service DISCOVERED" << newState;
 
-        QLowEnergyCharacteristic characteristic = service->characteristic(QBluetoothUuid::fromString("d52246df-98ac-4d21-be1b-70d5f66a5ddb")); // see here: https://shelly-api-docs.shelly.cloud/docs-ble/common/#common-gatt-services-and-characteristics
+	// see here: https://shelly-api-docs.shelly.cloud/docs-ble/common/#common-gatt-services-and-characteristics
+	#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+	QLowEnergyCharacteristic characteristic = service->characteristic(QBluetoothUuid(QString("d52246df-98ac-4d21-be1b-70d5f66a5ddb")));
+	#else
+        QLowEnergyCharacteristic characteristic = service->characteristic(QBluetoothUuid::fromString("d52246df-98ac-4d21-be1b-70d5f66a5ddb"));
+	#endif
+
         if (characteristic.isValid()) {
             qDebug() << "We found our 1st Characteristic!" << characteristic.uuid() << characteristic.value() << characteristic.name() << characteristic.properties() << "--- Descriptor list length:" << characteristic.descriptors().length();
             const QByteArray bytes = characteristic.value();
@@ -137,7 +143,12 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
             exit(CHARACTERISTIC_NOT_FOUND);
         }
 
-        characteristic = service->characteristic(QBluetoothUuid::fromString("d56a3410-115e-41d1-945b-3a7f189966a1")); // see here: https://shelly-api-docs.shelly.cloud/docs-ble/common/#common-gatt-services-and-characteristics
+	// see here: https://shelly-api-docs.shelly.cloud/docs-ble/common/#common-gatt-services-and-characteristics
+	#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        characteristic = service->characteristic(QBluetoothUuid(QString("d56a3410-115e-41d1-945b-3a7f189966a1")));
+	#else
+        characteristic = service->characteristic(QBluetoothUuid::fromString("d56a3410-115e-41d1-945b-3a7f189966a1"));
+	#endif
         if (characteristic.isValid()) {
             const QByteArray bytes = characteristic.value();
 

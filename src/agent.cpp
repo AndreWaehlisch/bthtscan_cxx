@@ -86,7 +86,7 @@ void agent::pairingFinished(const QBluetoothAddress &address, QBluetoothLocalDev
 
         if (address == device_i.address()) {
             do_BLE_connection(device_i);
-            pairingList.remove(i);
+            pairingList.removeAt(i);
             return;
         }
     }
