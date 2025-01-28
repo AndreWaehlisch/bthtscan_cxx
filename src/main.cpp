@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
     if (!outputFile.open()) {
         qDebug() << "COULD NOT OPEN OUR OUTPUT FILE";
         exit(1);
+    } else {
+        qDebug() << "File open:" << outputFile.fileName();
     }
 
     QDataStream dataStream(&outputFile);
