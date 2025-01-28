@@ -1,13 +1,12 @@
 #include <QLowEnergyCharacteristic>
 #include <QLowEnergyDescriptor>
-#include <QByteArray>
-#include <QDateTime>
-#include <QDataStream>
+#include <QtEndian>
 
 #include "global.h"
+#include "agent.h"
 #include "ble_agent.h"
 
-BLE_agent::BLE_agent(const QBluetoothDeviceInfo device, QObject *parent) : QObject(parent)
+BLE_agent::BLE_agent(const QBluetoothDeviceInfo device, agent *parent) : QObject(parent), parent(parent)
 {
     controller = QLowEnergyController::createCentral(device, parent);
 
@@ -24,6 +23,8 @@ BLE_agent::BLE_agent(const QBluetoothDeviceInfo device, QObject *parent) : QObje
 
     connect(controller, &QLowEnergyController::connected, this, &BLE_agent::connected);
     connect(controller, &QLowEnergyController::disconnected, this, &BLE_agent::disconnected);
+
+
 
     qDebug() << "Controller preperation done, connecting now!" << device.address() << device.name() << controller->state() << controller->localAddress();
     controller->connectToDevice();
@@ -84,7 +85,13 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
 
         if (characteristic.isValid()) {
             qDebug() << "We found our 1st Characteristic!" << characteristic.uuid() << characteristic.value() << characteristic.name() << characteristic.properties() << "--- Descriptor list length:" << characteristic.descriptors().length();
+
             const QByteArray bytes = characteristic.value();
+            quint8 packetID = 0;
+            quint8 battery = 127; // if this is not overwritten below, this value indicates a failure state
+            quint8 humidity = 127;
+            qint16 temp = -127;
+
             qDebug() << "TEST" << bytes << "--__--" << bytes.toHex();
             if (bytes.length() > 1) {
                 QByteArray::const_iterator it = bytes.cbegin();
@@ -96,21 +103,21 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
                     case 0x00: {
                         it++; // look at the next byte
 
-                        const quint8 packetID = static_cast<quint8>(*it);
+                        packetID = static_cast<quint8>(*it);
                         qDebug() << "packet ID is:" << packetID;
                         break;
                     }
                     case 0x01: {
                         it++; // look at the next byte
 
-                        const quint8 battery = static_cast<quint8>(*it);
+                        battery = static_cast<quint8>(*it);
                         qDebug() << "Battery level is: " << battery << "%";
                         break;
                     }
                     case 0x2E: {
                         it++; // look at the next byte
 
-                        const quint8 humidity = static_cast<quint8>(*it);
+                        humidity = static_cast<quint8>(*it);
                         qDebug() << "Humidity level is:" << humidity << "%";
                         break;
                     }
@@ -123,8 +130,8 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
                         reversed2Bytes.append(it[0]);
 
                         // convert our 2 bytes to int16
-                        const qint16 temp = qFromBigEndian<qint16>(reversed2Bytes);
-                        qDebug() << "Temperature:" << temp * 0.1 << "°C" << reversed2Bytes.toInt();
+                        temp = qFromBigEndian<qint16>(reversed2Bytes.constData());
+                        qDebug() << "Temperature:" << temp * 0.1 << "°C";
                         it++; // we used 2 bytes, so advance one additional time
                         break;
                     }
@@ -135,6 +142,8 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
 
                     it++;
                 };
+
+                writeSensorData1(bytes, packetID, battery, humidity, temp); // TODO: handle characteristic failing, in that case NO data should be written, also NO datetime should be written below
             } else {
                 qDebug() << "Payload too small!";
                 exit(PAYLOAD_TOO_SMALL);
@@ -158,13 +167,15 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
             }
 
             // convert our 4 bytes to int32
-            const qint32 converted = qFromBigEndian<qint32>(reversed4Bytes);
+            const qint32 converted = qFromBigEndian<qint32>(reversed4Bytes.constData());
 
             // convert int32 to QDateTime
             const QDateTime dateTimeStamp = QDateTime::fromSecsSinceEpoch(converted);
 
             qDebug() << "We found our 2nd Characteristic!" << characteristic.uuid() << characteristic.value();
             qDebug() << "UNIX time stamp:" << dateTimeStamp << bytes << converted;
+
+            writeSensorData2(dateTimeStamp); // TODO: handle characteristic failing, still the current datetime should be saved
         } else {
             qDebug() << "Required Characteristic 2 NOT found!";
             exit(CHARACTERISTIC_NOT_FOUND);
@@ -175,4 +186,19 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
 void BLE_agent::serviceError(QLowEnergyService::ServiceError error)
 {
     qDebug() << "Service ERROR:" << error;
+}
+
+void BLE_agent::writeSensorData1(const QByteArray rawData, const quint8 packetID, const quint8 battery, const quint8 humidity, const qint16 temp)
+{
+    parent->dataStream << rawData;
+    parent->dataStream << packetID;
+    parent->dataStream << battery;
+    parent->dataStream << humidity;
+    parent->dataStream << temp;
+}
+
+void BLE_agent::writeSensorData2(const QDateTime dateTimeStamp)
+{
+    parent->dataStream << dateTimeStamp;
+    parent->outputFile.flush();
 }

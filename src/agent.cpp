@@ -7,7 +7,7 @@
 
 const QStringList agent::targetIDs = {"0C:EF:F6:EF:A3:4E"}; // MAC addresses
 
-agent::agent() : QObject(nullptr)
+agent::agent(QDataStream &dataStream, QTemporaryFile &outputFile) : QObject(nullptr), dataStream(dataStream), outputFile(outputFile)
 {
     if (localDevice.hostMode() == QBluetoothLocalDevice::HostPoweredOff) {
         qDebug() << "Bluetooth is off. Exiting!";
@@ -16,7 +16,7 @@ agent::agent() : QObject(nullptr)
         qDebug() << "local host mode:" << localDevice.hostMode();
     }
 
-    discoveryAgent.setLowEnergyDiscoveryTimeout(61000);
+    discoveryAgent.setLowEnergyDiscoveryTimeout(65000);
 
     connect(&discoveryAgent, &QBluetoothDeviceDiscoveryAgent::finished, this, &agent::discoveryFinished);
     connect(&discoveryAgent, &QBluetoothDeviceDiscoveryAgent::deviceDiscovered, this, &agent::discoveryDeviceDiscovered);

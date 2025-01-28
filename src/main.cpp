@@ -1,4 +1,7 @@
 #include <QApplication>
+#include <QTemporaryFile>
+#include <QDataStream>
+#include <QIODevice>
 
 #include "agent.h"
 
@@ -8,6 +11,17 @@ int main(int argc, char *argv[])
     app.setOrganizationName("AndreWaehlisch");
     app.setApplicationName("bthtscan");
 
-    const agent myagent;
+    QTemporaryFile outputFile("test.output");
+
+    //if (!outputFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
+    if (!outputFile.open()) {
+        qDebug() << "COULD NOT OPEN OUR OUTPUT FILE";
+        exit(1);
+    }
+
+    QDataStream dataStream(&outputFile);
+    dataStream.setVersion(QDataStream::Qt_5_15);
+
+    const agent myagent(dataStream, outputFile);
     return app.exec();
 }
