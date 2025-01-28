@@ -2,6 +2,7 @@
 #include <QTemporaryFile>
 #include <QDataStream>
 #include <QIODevice>
+#include <QDebug>
 
 #include "agent.h"
 
