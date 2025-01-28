@@ -116,9 +116,15 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
                     }
                     case 0x45: {
                         it++; // look at the next 2 bytes
-                        qint16 temp = static_cast<qint16>(it[1]) << 8; // the bytes are in the wrong order, so start by using the byte with index [1] and shift it 1 byte = 8 bits to the left
-                        temp |= static_cast<qint16>(it[0]); // now use the second byte at index [0] to complete the 2-byte integer
-                        qDebug() << "Temperature:" << temp * 0.1 << "°C";
+
+                        // reverse byte order
+                        QByteArray reversed2Bytes;
+                        reversed2Bytes.append(it[1]);
+                        reversed2Bytes.append(it[0]);
+
+                        // convert our 2 bytes to int16
+                        const qint16 temp = qFromBigEndian<qint16>(reversed2Bytes);
+                        qDebug() << "Temperature:" << temp * 0.1 << "°C" << reversed2Bytes.toInt();
                         it++; // we used 2 bytes, so advance one additional time
                         break;
                     }
@@ -146,15 +152,13 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
             const QByteArray bytes = characteristic.value();
 
             // reverse byte order
-            QByteArray reversedBytes;
+            QByteArray reversed4Bytes;
             for (QByteArray::const_reverse_iterator it = bytes.crbegin(); it != bytes.crend(); it++) {
-                reversedBytes.append(*it);
+                reversed4Bytes.append(*it);
             }
 
             // convert our 4 bytes to int32
-            QDataStream stream(reversedBytes);
-            qint32 converted;
-            stream >> converted;
+            const qint32 converted = qFromBigEndian<qint32>(reversed4Bytes);
 
             // convert int32 to QDateTime
             const QDateTime dateTimeStamp = QDateTime::fromSecsSinceEpoch(converted);
