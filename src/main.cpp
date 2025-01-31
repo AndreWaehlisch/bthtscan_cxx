@@ -1,4 +1,4 @@
-#include <QApplication>
+#include <QCoreApplication>
 #include <QTemporaryFile>
 #include <QDataStream>
 #include <QIODevice>
@@ -8,7 +8,7 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
     app.setOrganizationName("AndreWaehlisch");
     app.setApplicationName("bthtscan");
 

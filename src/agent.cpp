@@ -71,8 +71,8 @@ void agent::discoveryDeviceDiscovered(const QBluetoothDeviceInfo &info)
                     //    localDevice.requestPairing(device_i.address(), QBluetoothLocalDevice::AuthorizedPaired);
                 } else {
                     qDebug() << "NOTE: device is paired";
-                    do_BLE_connection(device_i);
                 }
+                do_BLE_connection(device_i);
             }
         }
     }
