@@ -30,6 +30,7 @@ BLE_agent::BLE_agent(const QBluetoothDeviceInfo device, agent *parent) : QObject
 
 void BLE_agent::newServiceRead()
 {
+    qDebug() << "newServiceRead";
     service->readCharacteristic(characteristic1);
     service->readCharacteristic(characteristic2);
 }
@@ -131,7 +132,7 @@ void BLE_agent::processCharacteristic1(const QLowEnergyCharacteristic &character
                 break;
             }
             default:
-                qDebug() << "default case in iterator reached !!!";
+                qDebug() << "default case in iterator reached !!!" << bytes.length();
                 break;
             }
 
@@ -196,8 +197,8 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
             exit(CHARACTERISTIC_NOT_FOUND);
         }
 
-        // check every 10s for new value
-        timer->start(10000);
+        // check every 60s for new value
+        timer->start(60000);
     }
 }
 
