@@ -1,4 +1,3 @@
-#include <QLowEnergyDescriptor>
 #include <QtEndian>
 
 #include "global.h"
@@ -7,12 +6,14 @@
 
 BLE_agent::BLE_agent(const QBluetoothDeviceInfo device, agent *parent) : QObject(parent), parent(parent)
 {
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &BLE_agent::newServiceRead);
+
     controller = QLowEnergyController::createCentral(device, parent);
 
     connect(controller, &QLowEnergyController::serviceDiscovered, this, &BLE_agent::serviceDiscovered);
     connect(controller, &QLowEnergyController::discoveryFinished, this, &BLE_agent::discoveryFinished);
     connect(controller, &QLowEnergyController::stateChanged, this, &BLE_agent::stateChanged);
-
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     connect(controller, QOverload<QLowEnergyController::Error>::of(&QLowEnergyController::error), this, &BLE_agent::errorOccurred);
@@ -25,6 +26,12 @@ BLE_agent::BLE_agent(const QBluetoothDeviceInfo device, agent *parent) : QObject
 
     qDebug() << "Controller preperation done, connecting now!" << device.address() << device.name() << controller->state() << controller->localAddress();
     controller->connectToDevice();
+}
+
+void BLE_agent::newServiceRead()
+{
+    service->readCharacteristic(characteristic1);
+    service->readCharacteristic(characteristic2);
 }
 
 void BLE_agent::serviceDiscovered(const QBluetoothUuid &newService)
@@ -47,7 +54,7 @@ void BLE_agent::discoveryFinished()
 
 void BLE_agent::errorOccurred(QLowEnergyController::Error error)
 {
-    qDebug() << "Discovery error!" << error << controller->errorString() << controller->state();
+    qDebug() << "Controller error!" << error << controller->errorString() << controller->state();
 }
 
 void BLE_agent::connected()
@@ -166,31 +173,31 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
         qDebug() << "Service DISCOVERED" << newState;
 
         // sensor data; see here: https://shelly-api-docs.shelly.cloud/docs-ble/common/#common-gatt-services-and-characteristics
-        QLowEnergyCharacteristic characteristic = service->characteristic(QBluetoothUuid(QString("d52246df-98ac-4d21-be1b-70d5f66a5ddb")));
+        characteristic1 = service->characteristic(QBluetoothUuid(QString("d52246df-98ac-4d21-be1b-70d5f66a5ddb")));
 
-        if (characteristic.isValid()) {
-            QLowEnergyDescriptor notification = characteristic.descriptor(QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration);
-            qDebug() << "THIS IS MY DEBUG. Notification okay:" << notification.isValid();
-
-            const QByteArray bytes = characteristic.value();
-            processCharacteristic1(characteristic, bytes);
-            connect(service, &QLowEnergyService::characteristicChanged, this, &BLE_agent::processCharacteristic1);
+        if (characteristic1.isValid()) {
+            const QByteArray bytes = characteristic1.value();
+            processCharacteristic1(characteristic1, bytes);
+            connect(service, &QLowEnergyService::characteristicRead, this, &BLE_agent::processCharacteristic1);
         } else {
             qDebug() << "Required Characteristic 1 NOT found/valid!";
             exit(CHARACTERISTIC_NOT_FOUND);
         }
 
         // timestamp; see here: https://shelly-api-docs.shelly.cloud/docs-ble/common/#common-gatt-services-and-characteristics
-        characteristic = service->characteristic(QBluetoothUuid(QString("d56a3410-115e-41d1-945b-3a7f189966a1")));
+        characteristic2 = service->characteristic(QBluetoothUuid(QString("d56a3410-115e-41d1-945b-3a7f189966a1")));
 
-        if (characteristic.isValid()) {
-            const QByteArray bytes = characteristic.value();
-            processCharacteristic2(characteristic, bytes);
-            connect(service, &QLowEnergyService::characteristicChanged, this, &BLE_agent::processCharacteristic2);
+        if (characteristic2.isValid()) {
+            const QByteArray bytes = characteristic2.value();
+            processCharacteristic2(characteristic2, bytes);
+            connect(service, &QLowEnergyService::characteristicRead, this, &BLE_agent::processCharacteristic2);
         } else {
             qDebug() << "Required Characteristic 2 NOT found/valid!";
             exit(CHARACTERISTIC_NOT_FOUND);
         }
+
+        // check every 10s for new value
+        timer->start(10000);
     }
 }
 
