@@ -80,6 +80,8 @@ void agent::discoveryDeviceDiscovered(const QBluetoothDeviceInfo &info)
 
 void agent::pairingFinished(const QBluetoothAddress &address, QBluetoothLocalDevice::Pairing pairing)
 {
+    Q_UNUSED(pairing)
+
     for (qsizetype i = 0; i < pairingList.length(); i++) {
         QBluetoothDeviceInfo device_i = pairingList[i];
         qDebug() << "Pairing finished for device the following device, going to init BLE connection:" << device_i.address();

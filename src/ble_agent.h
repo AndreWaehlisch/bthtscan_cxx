@@ -8,6 +8,7 @@
 #include <QLowEnergyService>
 #include <QByteArray>
 #include <QDateTime>
+#include <QLowEnergyCharacteristic>
 
 // forward decleration so we avoid circular dependency
 class agent;
@@ -23,6 +24,8 @@ private:
     const agent *parent;
     QLowEnergyController *controller;
     QLowEnergyService *service;
+    void processCharacteristic1(const QLowEnergyCharacteristic &, const QByteArray &);
+    void processCharacteristic2(const QLowEnergyCharacteristic &, const QByteArray &);
     void writeSensorData1(const QByteArray, const quint8, const quint8, const quint8, const qint16);
     void writeSensorData2(const QDateTime);
 
