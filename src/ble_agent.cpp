@@ -147,6 +147,7 @@ void BLE_agent::processCharacteristic1(const QLowEnergyCharacteristic &character
     qDebug() << "Done with payload.";
 }
 
+/*
 void BLE_agent::processCharacteristic2(const QLowEnergyCharacteristic &characteristic, const QByteArray & bytes)
 {
     // reverse byte order
@@ -166,6 +167,7 @@ void BLE_agent::processCharacteristic2(const QLowEnergyCharacteristic &character
 
     writeSensorData2(dateTimeStamp); // TODO: handle characteristic failing, still the current datetime should be saved
 }
+*/
 
 void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
 {
@@ -185,6 +187,12 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
             exit(CHARACTERISTIC_NOT_FOUND);
         }
 
+	// in principle the device gives a timestamp, but this was buggy, so just use the current time
+	const QDateTime now = QDateTime::currentDateTime();
+	writeSensorData2(now);
+	qDebug() << "Current DateTime timestamp" << now;
+
+	/*
         // timestamp; see here: https://shelly-api-docs.shelly.cloud/docs-ble/common/#common-gatt-services-and-characteristics
         characteristic2 = service->characteristic(QBluetoothUuid(QString("d56a3410-115e-41d1-945b-3a7f189966a1")));
 
@@ -196,6 +204,7 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
             qDebug() << "Required Characteristic 2 NOT found/valid!";
             exit(CHARACTERISTIC_NOT_FOUND);
         }
+	*/
 
         // check every 60s for new value
         timer->start(60000);

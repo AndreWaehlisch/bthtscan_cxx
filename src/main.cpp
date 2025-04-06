@@ -1,5 +1,5 @@
 #include <QCoreApplication>
-#include <QTemporaryFile>
+#include <QFile>
 #include <QDataStream>
 #include <QIODevice>
 #include <QDebug>
@@ -12,10 +12,9 @@ int main(int argc, char *argv[])
     app.setOrganizationName("AndreWaehlisch");
     app.setApplicationName("bthtscan");
 
-    QTemporaryFile outputFile("test.output");
+    QFile outputFile("test.output");
 
-    //if (!outputFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
-    if (!outputFile.open()) {
+    if (!outputFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
         qDebug() << "COULD NOT OPEN OUR OUTPUT FILE";
         exit(1);
     } else {

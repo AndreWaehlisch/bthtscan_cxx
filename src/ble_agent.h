@@ -30,7 +30,7 @@ private:
     QLowEnergyCharacteristic characteristic2;
     void newServiceRead();
     void processCharacteristic1(const QLowEnergyCharacteristic &, const QByteArray &);
-    void processCharacteristic2(const QLowEnergyCharacteristic &, const QByteArray &);
+    //void processCharacteristic2(const QLowEnergyCharacteristic &, const QByteArray &);
     void writeSensorData1(const QByteArray, const quint8, const quint8, const quint8, const qint16);
     void writeSensorData2(const QDateTime);
 
