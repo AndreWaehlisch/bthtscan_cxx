@@ -30,9 +30,8 @@ BLE_agent::BLE_agent(const QBluetoothDeviceInfo device, agent *parent) : QObject
 
 void BLE_agent::newServiceRead()
 {
-    qDebug() << "newServiceRead";
     service->readCharacteristic(characteristic1);
-    service->readCharacteristic(characteristic2);
+    //service->readCharacteristic(characteristic2);
 }
 
 void BLE_agent::serviceDiscovered(const QBluetoothUuid &newService)

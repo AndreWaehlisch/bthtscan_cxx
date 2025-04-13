@@ -27,7 +27,7 @@ private:
     QLowEnergyController *controller;
     QLowEnergyService *service;
     QLowEnergyCharacteristic characteristic1;
-    QLowEnergyCharacteristic characteristic2;
+    //QLowEnergyCharacteristic characteristic2;
     void newServiceRead();
     void processCharacteristic1(const QLowEnergyCharacteristic &, const QByteArray &);
     //void processCharacteristic2(const QLowEnergyCharacteristic &, const QByteArray &);
