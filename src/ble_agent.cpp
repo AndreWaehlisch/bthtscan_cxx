@@ -138,7 +138,7 @@ void BLE_agent::processCharacteristic1(const QLowEnergyCharacteristic &character
             it++;
         };
 
-        writeSensorData1(bytes, packetID, battery, humidity, temp); // TODO: handle characteristic failing, in that case NO data should be written, also NO datetime should be written below
+        writeSensorData1(packetID, battery, humidity, temp); // TODO: handle characteristic failing, in that case NO data should be written, also NO datetime should be written below
     } else {
         qDebug() << "Payload too small!";
         exit(PAYLOAD_TOO_SMALL);
@@ -215,9 +215,8 @@ void BLE_agent::serviceError(QLowEnergyService::ServiceError error)
     qDebug() << "Service ERROR:" << error;
 }
 
-void BLE_agent::writeSensorData1(const QByteArray rawData, const quint8 packetID, const quint8 battery, const quint8 humidity, const qint16 temp)
+void BLE_agent::writeSensorData1(const quint8 packetID, const quint8 battery, const quint8 humidity, const qint16 temp)
 {
-    parent->dataStream << rawData << ",";
     parent->dataStream << packetID << ",";
     parent->dataStream << battery << ",";
     parent->dataStream << humidity << ",";
