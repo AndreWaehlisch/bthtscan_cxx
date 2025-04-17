@@ -7,8 +7,7 @@
 #include <QBluetoothDeviceInfo>
 #include <QBluetoothDeviceDiscoveryAgent>
 #include <QBluetoothLocalDevice>
-#include <QDataStream>
-#include <QFile>
+#include <QTextStream>
 
 // forward decleration so we avoid circular dependency
 class BLE_agent;
@@ -18,9 +17,8 @@ class agent : public QObject
     Q_OBJECT
 
 public:
-    agent(QDataStream &, QFile &);
-    QDataStream &dataStream;
-    QFile &outputFile;
+    agent(QTextStream &);
+    QTextStream &dataStream;
 
 private:
     static const QStringList targetIDs;

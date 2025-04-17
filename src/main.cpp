@@ -1,7 +1,6 @@
 #include <QCoreApplication>
 #include <QFile>
-#include <QDataStream>
-#include <QIODevice>
+#include <QTextStream>
 #include <QDebug>
 
 #include "agent.h"
@@ -12,18 +11,17 @@ int main(int argc, char *argv[])
     app.setOrganizationName("AndreWaehlisch");
     app.setApplicationName("bthtscan");
 
-    QFile outputFile("test.output");
+    QFile outputFile("bthtscan.csv");
 
-    if (!outputFile.open(QIODevice::WriteOnly | QIODevice::Append)) {
+    if (!outputFile.open(QFile::WriteOnly | QFile::Append)) {
         qDebug() << "COULD NOT OPEN OUR OUTPUT FILE";
         exit(1);
     } else {
         qDebug() << "File open:" << outputFile.fileName();
     }
 
-    QDataStream dataStream(&outputFile);
-    dataStream.setVersion(QDataStream::Qt_5_15);
+    QTextStream dataStream(&outputFile);
 
-    const agent myagent(dataStream, outputFile);
+    const agent myagent(dataStream);
     return app.exec();
 }

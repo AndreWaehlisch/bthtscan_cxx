@@ -126,7 +126,7 @@ void BLE_agent::processCharacteristic1(const QLowEnergyCharacteristic &character
 
                 // convert our 2 bytes to int16
                 temp = qFromBigEndian<qint16>(reversed2Bytes.constData());
-                qDebug() << "Temperature:" << temp * 0.1 << "°C";
+                qDebug() << "Temperature:" << temp * 0.1 << "Ã‚Â°C";
                 it++; // we used 2 bytes, so advance one additional time
                 break;
             }
@@ -186,12 +186,12 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
             exit(CHARACTERISTIC_NOT_FOUND);
         }
 
-	// in principle the device gives a timestamp, but this was buggy, so just use the current time
-	const QDateTime now = QDateTime::currentDateTime();
-	writeSensorData2(now);
-	qDebug() << "Current DateTime timestamp" << now;
+        // in principle the device gives a timestamp, but this was buggy, so just use the current time
+        const QDateTime now = QDateTime::currentDateTime();
+        writeSensorData2(now);
+        qDebug() << "Current DateTime timestamp" << now;
 
-	/*
+        /*
         // timestamp; see here: https://shelly-api-docs.shelly.cloud/docs-ble/common/#common-gatt-services-and-characteristics
         characteristic2 = service->characteristic(QBluetoothUuid(QString("d56a3410-115e-41d1-945b-3a7f189966a1")));
 
@@ -203,7 +203,7 @@ void BLE_agent::serviceStateChanged(QLowEnergyService::ServiceState newState)
             qDebug() << "Required Characteristic 2 NOT found/valid!";
             exit(CHARACTERISTIC_NOT_FOUND);
         }
-	*/
+        */
 
         // check every 60s for new value
         timer->start(60000);
@@ -217,15 +217,15 @@ void BLE_agent::serviceError(QLowEnergyService::ServiceError error)
 
 void BLE_agent::writeSensorData1(const QByteArray rawData, const quint8 packetID, const quint8 battery, const quint8 humidity, const qint16 temp)
 {
-    parent->dataStream << rawData;
-    parent->dataStream << packetID;
-    parent->dataStream << battery;
-    parent->dataStream << humidity;
-    parent->dataStream << temp;
+    parent->dataStream << rawData << ",";
+    parent->dataStream << packetID << ",";
+    parent->dataStream << battery << ",";
+    parent->dataStream << humidity << ",";
+    parent->dataStream << temp << ",";
 }
 
 void BLE_agent::writeSensorData2(const QDateTime dateTimeStamp)
 {
-    parent->dataStream << dateTimeStamp;
-    parent->outputFile.flush();
+    parent->dataStream << dateTimeStamp.toString("hh:mm:ss-dd.MM.yyyy") << "\n";
+    parent->dataStream.flush();
 }

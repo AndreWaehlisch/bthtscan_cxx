@@ -7,7 +7,7 @@
 
 const QStringList agent::targetIDs = {"0C:EF:F6:EF:A3:4E"}; // MAC addresses
 
-agent::agent(QDataStream &dataStream, QFile &outputFile) : QObject(nullptr), dataStream(dataStream), outputFile(outputFile)
+agent::agent(QTextStream &dataStream) : QObject(nullptr), dataStream(dataStream)
 {
     if (localDevice.hostMode() == QBluetoothLocalDevice::HostPoweredOff) {
         qDebug() << "Bluetooth is off. Exiting!";
