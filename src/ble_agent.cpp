@@ -126,7 +126,7 @@ void BLE_agent::processCharacteristic1(const QLowEnergyCharacteristic &character
 
                 // convert our 2 bytes to int16
                 temp = qFromBigEndian<qint16>(reversed2Bytes.constData());
-                qDebug() << "Temperature:" << temp * 0.1 << "Ã‚Â°C";
+                qDebug() << "Temperature:" << temp * 0.1 << "°C";
                 it++; // we used 2 bytes, so advance one additional time
                 break;
             }
